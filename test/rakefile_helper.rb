@@ -6,9 +6,9 @@
 
 require 'yaml'
 require 'fileutils'
-require_relative '../auto/unity_test_summary'
-require_relative '../auto/generate_test_runner'
-require_relative '../auto/colour_reporter'
+require UNITY_ROOT + '../auto/unity_test_summary'
+require UNITY_ROOT + '../auto/generate_test_runner'
+require UNITY_ROOT + '../auto/colour_reporter'
 
 module RakefileHelpers
   C_EXTENSION = '.c'.freeze
@@ -179,7 +179,7 @@ module RakefileHelpers
 
   def report_summary
     summary = UnityTestSummary.new
-    summary.root = __dir__
+    summary.root = UNITY_ROOT
     results_glob = "#{$cfg['compiler']['build_path']}*.test*"
     results_glob.tr!('\\', '/')
     results = Dir[results_glob]

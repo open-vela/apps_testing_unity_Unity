@@ -210,7 +210,7 @@ class ParseOutput
 
   # Adjusts the os specific members according to the current path style
   # (Windows or Unix based)
-  def detect_os_specifics(line)
+  def set_os_specifics(line)
     if line.include? '\\'
       # Windows X:\Y\Z
       @class_name_idx = 1
@@ -254,42 +254,43 @@ class ParseOutput
       # TEST(<test_group, <test_file>) PASS
       #
       # Note: Where path is different on Unix vs Windows devices (Windows leads with a drive letter)!
-      detect_os_specifics(line)
+      set_os_specifics(line)
       line_array = line.split(':')
 
       # If we were able to split the line then we can look to see if any of our target words
       # were found. Case is important.
-      next unless (line_array.size >= 4) || (line.start_with? 'TEST(') || (line.start_with? 'IGNORE_TEST(')
+      if (line_array.size >= 4) || (line.start_with? 'TEST(') || (line.start_with? 'IGNORE_TEST(')
 
-      # check if the output is fixture output (with verbose flag "-v")
-      if (line.start_with? 'TEST(') || (line.start_with? 'IGNORE_TEST(')
-        line_array = prepare_fixture_line(line)
-        if line.include? ' PASS'
-          test_passed_unity_fixture(line_array)
+        # check if the output is fixture output (with verbose flag "-v")
+        if (line.start_with? 'TEST(') || (line.start_with? 'IGNORE_TEST(')
+          line_array = prepare_fixture_line(line)
+          if line.include? ' PASS'
+            test_passed_unity_fixture(line_array)
+            @test_passed += 1
+          elsif line.include? 'FAIL'
+            test_failed_unity_fixture(line_array)
+            @test_failed += 1
+          elsif line.include? 'IGNORE'
+            test_ignored_unity_fixture(line_array)
+            @test_ignored += 1
+          end
+        # normal output / fixture output (without verbose "-v")
+        elsif line.include? ':PASS'
+          test_passed(line_array)
           @test_passed += 1
-        elsif line.include? 'FAIL'
-          test_failed_unity_fixture(line_array)
+        elsif line.include? ':FAIL'
+          test_failed(line_array)
           @test_failed += 1
-        elsif line.include? 'IGNORE'
-          test_ignored_unity_fixture(line_array)
+        elsif line.include? ':IGNORE:'
+          test_ignored(line_array)
+          @test_ignored += 1
+        elsif line.include? ':IGNORE'
+          line_array.push('No reason given')
+          test_ignored(line_array)
           @test_ignored += 1
         end
-      # normal output / fixture output (without verbose "-v")
-      elsif line.include? ':PASS'
-        test_passed(line_array)
-        @test_passed += 1
-      elsif line.include? ':FAIL'
-        test_failed(line_array)
-        @test_failed += 1
-      elsif line.include? ':IGNORE:'
-        test_ignored(line_array)
-        @test_ignored += 1
-      elsif line.include? ':IGNORE'
-        line_array.push('No reason given')
-        test_ignored(line_array)
-        @test_ignored += 1
+        @total_tests = @test_passed + @test_failed + @test_ignored
       end
-      @total_tests = @test_passed + @test_failed + @test_ignored
     end
     puts ''
     puts '=================== SUMMARY ====================='
