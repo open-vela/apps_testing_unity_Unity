@@ -27,7 +27,6 @@ class UnityTestRunnerGenerator
       mock_suffix: '',
       setup_name: 'setUp',
       teardown_name: 'tearDown',
-      test_reset_name: 'resetTest',
       main_name: 'main', # set to :auto to automatically generate each time
       main_export_decl: '',
       cmdline_args: false,
@@ -300,7 +299,6 @@ class UnityTestRunnerGenerator
     output.puts('  Unity.CurrentTestLineNumber = TestLineNum; \\')
     output.puts('  if (UnityTestMatches()) { \\') if @options[:cmdline_args]
     output.puts('  Unity.NumberOfTests++; \\')
-    output.puts('  UNITY_EXEC_TIME_START(); \\')
     output.puts('  CMock_Init(); \\') unless used_mocks.empty?
     output.puts('  UNITY_CLR_DETAILS(); \\') unless used_mocks.empty?
     output.puts('  if (TEST_PROTECT()) \\')
@@ -317,7 +315,6 @@ class UnityTestRunnerGenerator
     output.puts('    CMock_Verify(); \\') unless used_mocks.empty?
     output.puts('  } \\')
     output.puts('  CMock_Destroy(); \\') unless used_mocks.empty?
-    output.puts('  UNITY_EXEC_TIME_STOP(); \\')
     output.puts('  UnityConcludeTest(); \\')
     output.puts('  } \\') if @options[:cmdline_args]
     output.puts("}\n")
@@ -325,8 +322,8 @@ class UnityTestRunnerGenerator
 
   def create_reset(output, used_mocks)
     output.puts("\n/*=======Test Reset Option=====*/")
-    output.puts("void #{@options[:test_reset_name]}(void);")
-    output.puts("void #{@options[:test_reset_name]}(void)")
+    output.puts('void resetTest(void);')
+    output.puts('void resetTest(void)')
     output.puts('{')
     output.puts('  CMock_Verify();') unless used_mocks.empty?
     output.puts('  CMock_Destroy();') unless used_mocks.empty?
@@ -460,7 +457,6 @@ if $0 == __FILE__
           '    --teardown_name=""    - redefine tearDown func name to something else',
           '    --main_name=""        - redefine main func name to something else',
           '    --test_prefix=""      - redefine test prefix from default test|spec|should',
-          '    --test_reset_name=""  - redefine resetTest func name to something else',
           '    --suite_setup=""      - code to execute for setup of entire suite',
           '    --suite_teardown=""   - code to execute for teardown of entire suite',
           '    --use_param_tests=1   - enable parameterized tests (disabled by default)',
