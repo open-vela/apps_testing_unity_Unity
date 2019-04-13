@@ -1,6 +1,6 @@
 /* =========================================================================
     Unity Project - A Test Framework for C
-    Copyright (c) 2007-19 Mike Karlesky, Mark VanderVoord, Greg Williams
+    Copyright (c) 2007-14 Mike Karlesky, Mark VanderVoord, Greg Williams
     [Released under MIT License. Please refer to license.txt for details]
 ============================================================================ */
 
@@ -21,15 +21,15 @@ void UNITY_OUTPUT_CHAR(int);
 struct UNITY_STORAGE_T Unity;
 
 #ifdef UNITY_OUTPUT_COLOR
-const char UnityStrOk[]                            = "\033[42mOK\033[00m";
-const char UnityStrPass[]                          = "\033[42mPASS\033[00m";
-const char UnityStrFail[]                          = "\033[41mFAIL\033[00m";
-const char UnityStrIgnore[]                        = "\033[43mIGNORE\033[00m";
+static const char UnityStrOk[]                     = "\033[42mOK\033[00m";
+static const char UnityStrPass[]                   = "\033[42mPASS\033[00m";
+static const char UnityStrFail[]                   = "\033[41mFAIL\033[00m";
+static const char UnityStrIgnore[]                 = "\033[43mIGNORE\033[00m";
 #else
-const char UnityStrOk[]                            = "OK";
-const char UnityStrPass[]                          = "PASS";
-const char UnityStrFail[]                          = "FAIL";
-const char UnityStrIgnore[]                        = "IGNORE";
+static const char UnityStrOk[]                     = "OK";
+static const char UnityStrPass[]                   = "PASS";
+static const char UnityStrFail[]                   = "FAIL";
+static const char UnityStrIgnore[]                 = "IGNORE";
 #endif
 static const char UnityStrNull[]                   = "NULL";
 static const char UnityStrSpacer[]                 = ". ";
@@ -352,9 +352,9 @@ void UnityPrintNumberHex(const UNITY_UINT number, const char nibbles_to_print)
     int nibble;
     char nibbles = nibbles_to_print;
 
-    if ((unsigned)nibbles > UNITY_MAX_NIBBLES)
+    if ((unsigned)nibbles > (2 * sizeof(number)))
     {
-        nibbles = UNITY_MAX_NIBBLES;
+        nibbles = 2 * sizeof(number);
     }
 
     while (nibbles > 0)
@@ -693,8 +693,7 @@ static int UnityIsOneArrayNull(UNITY_INTERNAL_PTR expected,
                                const UNITY_LINE_TYPE lineNumber,
                                const char* msg)
 {
-    /* Both are NULL or same pointer */
-    if (expected == actual) { return 0; }
+    if (expected == actual) return 0; /* Both are NULL or same pointer */
 
     /* print and return true if just expected is NULL */
     if (expected == NULL)
@@ -818,9 +817,8 @@ void UnityAssertEqualIntArray(UNITY_INTERNAL_PTR expected,
                               const UNITY_DISPLAY_STYLE_T style,
                               const UNITY_FLAGS_T flags)
 {
-    UNITY_UINT32 elements  = num_elements;
-    unsigned int length    = style & 0xF;
-    unsigned int increment = 0;
+    UNITY_UINT32 elements = num_elements;
+    unsigned int length   = style & 0xF;
 
     RETURN_IF_FAIL_OR_IGNORE;
 
@@ -843,41 +841,32 @@ void UnityAssertEqualIntArray(UNITY_INTERNAL_PTR expected,
     {
         UNITY_INT expect_val;
         UNITY_INT actual_val;
-
         switch (length)
         {
             case 1:
                 expect_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT8*)expected;
                 actual_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT8*)actual;
-                increment  = sizeof(UNITY_INT8);
                 break;
-
             case 2:
                 expect_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT16*)expected;
                 actual_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT16*)actual;
-                increment  = sizeof(UNITY_INT16);
                 break;
-
 #ifdef UNITY_SUPPORT_64
             case 8:
                 expect_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT64*)expected;
                 actual_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT64*)actual;
-                increment  = sizeof(UNITY_INT64);
                 break;
 #endif
-
-            default: /* default is length 4 bytes */
-            case 4:
+            default: /* length 4 bytes */
                 expect_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT32*)expected;
                 actual_val = *(UNITY_PTR_ATTRIBUTE const UNITY_INT32*)actual;
-                increment  = sizeof(UNITY_INT32);
                 length = 4;
                 break;
         }
 
         if (expect_val != actual_val)
         {
-            if ((style & UNITY_DISPLAY_RANGE_UINT) && (length < (UNITY_INT_WIDTH / 8)))
+            if ((style & UNITY_DISPLAY_RANGE_UINT) && (length < sizeof(expect_val)))
             {   /* For UINT, remove sign extension (padding 1's) from signed type casts above */
                 UNITY_INT mask = 1;
                 mask = (mask << 8 * length) - 1;
@@ -894,12 +883,11 @@ void UnityAssertEqualIntArray(UNITY_INTERNAL_PTR expected,
             UnityAddMsgIfSpecified(msg);
             UNITY_FAIL_AND_BAIL;
         }
-        /* Walk through array by incrementing the pointers */
         if (flags == UNITY_ARRAY_TO_ARRAY)
         {
-            expected = (UNITY_INTERNAL_PTR)((const char*)expected + increment);
+            expected = (UNITY_INTERNAL_PTR)(length + (const char*)expected);
         }
-        actual = (UNITY_INTERNAL_PTR)((const char*)actual + increment);
+        actual   = (UNITY_INTERNAL_PTR)(length + (const char*)actual);
     }
 }
 
@@ -1504,22 +1492,21 @@ UNITY_INTERNAL_PTR UnityNumToPtr(const UNITY_INT num, const UNITY_UINT8 size)
     switch(size)
     {
         case 1:
-            UnityQuickCompare.i8 = (UNITY_INT8)num;
-            return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i8);
+          UnityQuickCompare.i8 = (UNITY_INT8)num;
+          return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i8);
 
         case 2:
-            UnityQuickCompare.i16 = (UNITY_INT16)num;
-            return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i16);
+          UnityQuickCompare.i16 = (UNITY_INT16)num;
+          return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i16);
 
 #ifdef UNITY_SUPPORT_64
         case 8:
-            UnityQuickCompare.i64 = (UNITY_INT64)num;
-            return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i64);
+          UnityQuickCompare.i64 = (UNITY_INT64)num;
+          return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i64);
 #endif
-
         default: /* 4 bytes */
-            UnityQuickCompare.i32 = (UNITY_INT32)num;
-            return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i32);
+          UnityQuickCompare.i32 = (UNITY_INT32)num;
+          return (UNITY_INTERNAL_PTR)(&UnityQuickCompare.i32);
     }
 }
 
