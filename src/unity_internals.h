@@ -1,6 +1,6 @@
 /* ==========================================
     Unity Project - A Test Framework for C
-    Copyright (c) 2007-19 Mike Karlesky, Mark VanderVoord, Greg Williams
+    Copyright (c) 2007-14 Mike Karlesky, Mark VanderVoord, Greg Williams
     [Released under MIT License. Please refer to license.txt for details]
 ========================================== */
 
@@ -122,20 +122,18 @@
  * 64-bit Support
  *-------------------------------------------------------*/
 
-/* Auto-detect 64 Bit Support */
 #ifndef UNITY_SUPPORT_64
   #if UNITY_LONG_WIDTH == 64 || UNITY_POINTER_WIDTH == 64
     #define UNITY_SUPPORT_64
   #endif
 #endif
 
-/* 64-Bit Support Dependent Configuration */
 #ifndef UNITY_SUPPORT_64
     /* No 64-bit Support */
     typedef UNITY_UINT32 UNITY_UINT;
     typedef UNITY_INT32 UNITY_INT;
-    #define UNITY_MAX_NIBBLES (8)  /* Maximum number of nibbles in a UNITY_(U)INT */
 #else
+
   /* 64-bit Support */
   #if (UNITY_LONG_WIDTH == 32)
     typedef unsigned long long UNITY_UINT64;
@@ -148,7 +146,7 @@
   #endif
     typedef UNITY_UINT64 UNITY_UINT;
     typedef UNITY_INT64 UNITY_INT;
-    #define UNITY_MAX_NIBBLES (16) /* Maximum number of nibbles in a UNITY_(U)INT */
+
 #endif
 
 /*-------------------------------------------------------
@@ -377,7 +375,7 @@ typedef void (*UnityTestFunction)(void);
 
 typedef enum
 {
-    UNITY_DISPLAY_STYLE_INT      = sizeof(int) + UNITY_DISPLAY_RANGE_INT,
+UNITY_DISPLAY_STYLE_INT = sizeof(int)+ UNITY_DISPLAY_RANGE_INT,
     UNITY_DISPLAY_STYLE_INT8     = 1 + UNITY_DISPLAY_RANGE_INT,
     UNITY_DISPLAY_STYLE_INT16    = 2 + UNITY_DISPLAY_RANGE_INT,
     UNITY_DISPLAY_STYLE_INT32    = 4 + UNITY_DISPLAY_RANGE_INT,
@@ -385,7 +383,7 @@ typedef enum
     UNITY_DISPLAY_STYLE_INT64    = 8 + UNITY_DISPLAY_RANGE_INT,
 #endif
 
-    UNITY_DISPLAY_STYLE_UINT     = sizeof(unsigned) + UNITY_DISPLAY_RANGE_UINT,
+UNITY_DISPLAY_STYLE_UINT = sizeof(unsigned) + UNITY_DISPLAY_RANGE_UINT,
     UNITY_DISPLAY_STYLE_UINT8    = 1 + UNITY_DISPLAY_RANGE_UINT,
     UNITY_DISPLAY_STYLE_UINT16   = 2 + UNITY_DISPLAY_RANGE_UINT,
     UNITY_DISPLAY_STYLE_UINT32   = 4 + UNITY_DISPLAY_RANGE_UINT,
@@ -640,11 +638,6 @@ UNITY_INTERNAL_PTR UnityDoubleToPtr(const double num);
 /*-------------------------------------------------------
  * Error Strings We Might Need
  *-------------------------------------------------------*/
-
-extern const char UnityStrOk[];
-extern const char UnityStrPass[];
-extern const char UnityStrFail[];
-extern const char UnityStrIgnore[];
 
 extern const char UnityStrErrFloat[];
 extern const char UnityStrErrDouble[];
