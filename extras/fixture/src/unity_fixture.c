@@ -79,20 +79,14 @@ void UnityTestRunner(unityfunction* setup,
         Unity.TestFile = file;
         Unity.CurrentTestName = printableName;
         Unity.CurrentTestLineNumber = line;
-        if (UnityFixture.Verbose)
+        if (!UnityFixture.Verbose)
+            UNITY_OUTPUT_CHAR('.');
+        else
         {
             UnityPrint(printableName);
         #ifndef UNITY_REPEAT_TEST_NAME
             Unity.CurrentTestName = NULL;
         #endif
-        }
-        else if (UnityFixture.Silent)
-        {
-            /* Do Nothing */
-        }
-        else
-        {
-            UNITY_OUTPUT_CHAR('.');
         }
 
         Unity.NumberOfTests++;
@@ -126,18 +120,12 @@ void UnityIgnoreTest(const char* printableName, const char* group, const char* n
     {
         Unity.NumberOfTests++;
         Unity.TestIgnores++;
-        if (UnityFixture.Verbose)
+        if (!UnityFixture.Verbose)
+            UNITY_OUTPUT_CHAR('!');
+        else
         {
             UnityPrint(printableName);
             UNITY_PRINT_EOL();
-        }
-        else if (UnityFixture.Silent)
-        {
-            /* Do Nothing */
-        }
-        else
-        {
-            UNITY_OUTPUT_CHAR('!');
         }
     }
 }
@@ -362,7 +350,6 @@ int UnityGetCommandLineOptions(int argc, const char* argv[])
 {
     int i;
     UnityFixture.Verbose = 0;
-    UnityFixture.Silent = 0;
     UnityFixture.GroupFilter = 0;
     UnityFixture.NameFilter = 0;
     UnityFixture.RepeatCount = 1;
@@ -375,11 +362,6 @@ int UnityGetCommandLineOptions(int argc, const char* argv[])
         if (strcmp(argv[i], "-v") == 0)
         {
             UnityFixture.Verbose = 1;
-            i++;
-        }
-        else if (strcmp(argv[i], "-s") == 0)
-        {
-            UnityFixture.Silent = 1;
             i++;
         }
         else if (strcmp(argv[i], "-g") == 0)
