@@ -342,6 +342,10 @@ void UnityPrintNumberByStyle(const UNITY_INT number, const UNITY_DISPLAY_STYLE_T
     {
         UnityPrintNumberUnsigned((UNITY_UINT)number);
     }
+    else if ((style & UNITY_DISPLAY_RANGE_UINT) == UNITY_DISPLAY_RANGE_UINT)
+    {
+        UnityPrintNumberUnsigned((UNITY_UINT)number);
+    }
     else
     {
         UNITY_OUTPUT_CHAR('0');
@@ -1818,12 +1822,6 @@ void UnityDefaultTestRun(UnityTestFunction Func, const char* FuncName, const int
     }
     UNITY_EXEC_TIME_STOP();
     UnityConcludeTest();
-}
-
-/*-----------------------------------------------*/
-void UnitySetTestFile(const char* filename)
-{
-	Unity.TestFile = filename;
 }
 
 /*-----------------------------------------------*/
