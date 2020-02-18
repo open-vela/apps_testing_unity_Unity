@@ -1,9 +1,14 @@
-#
-# build script written by : Michael Brockus.
-# github repo author: Mike Karlesky, Mark VanderVoord, Greg Williams.
-#
-# license: MIT
-#
+###################################################################################
+#                                                                                 #
+# NAME: meson.build                                                               #
+#                                                                                 #
+# AUTHOR: Mike Karlesky, Mark VanderVoord, Greg Williams.                         #
+# WRITTEN BY: Michael Brockus.                                                    #
+#                                                                                 #
+# License: MIT                                                                    #
+#                                                                                 #
+###################################################################################
+
 inc_dir = include_directories('.')
 lib_list = {'a': ['ProductionCode.c' ], 'b': ['ProductionCode2.c']}
 
